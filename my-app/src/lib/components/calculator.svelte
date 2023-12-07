@@ -2,15 +2,10 @@
 import {onMount} from 'svelte';
  let result='';
  
+let isComma=false
+let regex=/[+\-*/]$/
+let regexComma=/[.]$/;
 
-
-let test=(operator)=>{
-    
-    console.log(operator);
-// if(oper==='/'){
-
-// }
-}
 
 
 let backspace=()=>{
@@ -22,54 +17,44 @@ let backspace=()=>{
         for(let i=0;i<result.length-1;i++){
             temp=temp+result[i]
         }
+        if(result[result.length-1]==='.'){
+            isComma=false
+        }
         result=temp
-        
     }
 }
 
+let dot =()=>{ 
+    if (!result||regex.test(result)){
+        result+='0.'
+    }else if(regexComma.test(result)){
+        console.log('no')
+    }else if(isComma === false){
+        result+='.';
+         isComma=!isComma
+        }
+}
 let operator=(operator)=>{
-let regex=/[+\-.*/]$/
     if (!result){
-    }else if(regex.test(result)){
-       console.log('no')
-    // else if(result[result.length-1]===operator){
-       
+    }else if(regex.test(result)||regexComma.test(result)){
+       console.log('no') 
     }else{
-
         result+=operator
+        isComma=false
     }
 }
 
 let calculate=()=>{
-
-    // let calculateArr=result.split(' ')
-    // for (let i=0; i<calculateArr.length; i++) {
-       
-    // }
-    result=eval(result)
-//     let regex=/[+\-x/]/
-//     let left
-//     let right
-//     let operator
-//     let flag=false 
-//     for (let i=0; i<result.length;i++){
-//         if(result[i]!==regex){//make sure
-//             if(flag===false){
-//                 left.push(result[i])
-//             }else{
-//                 right.push(result[i])
-//             }
-//         } else if(result[i]===regex){//make sure
-//             operator = result[i]
-//             flag=!flag
-//     }
-// }
-// let sum
-//    sum= left+(operator)+right
-// if(operator==='+'){
-
-// }
-
+    if(regex.test(result) || regexComma.test(result)){
+        console.log('cant calculate if operator or comma is the last thing you type')
+    }else if(eval(result)){
+        result=eval(result)
+        if(result%1!==0){
+            isComma=true
+        }else if(result%1===0){
+            isComma=false
+        }
+    }
 }
 
 onMount(()=>{
@@ -77,10 +62,32 @@ onMount(()=>{
 })
 
 function handleKeydown(event) {
-    if (event.key === "Enter") { // Replace 'Enter' with the key you want
+    document.activeElement.blur();
+    if (event.key === "Enter") { 
     calculate();
     }
+
+    else if (event.key=== "Backspace"){
+        backspace();
+    }
+    else if (event.key>= "0" && event.key<= "9" ){
+        result += event.key
+    }
+    else if(event.key ==='*' || event.key ==='-' || event.key ==='/' || event.key ==='+'){
+        operator(event.key)
+    }
+    else if(event.key ==='C' ||event.key ==='c' ){
+        isComma=!isComma
+        result=''
+    }
+    else if (event.key ==='.'){
+       dot()
+
+    }
+
   }
+
+  
 
 </script>
 
@@ -101,11 +108,11 @@ function handleKeydown(event) {
     <button on:click={()=>result+='2'} class="grid-item">2</button>
     <button on:click={()=>result+='3'} class="grid-item">3</button>
     <button id="operator" value="+" on:click={()=>operator('+')} class="grid-item">+</button> <!--calculation needed -->
-    <button on:click={()=>{result=''}} class="grid-item">C</button>
+    <button on:click={()=>{isComma=!isComma;result=''}} class="grid-item">C</button>
     <button on:click={()=>result+='0'} class="grid-item">0</button>
-    <button on:click={()=>operator('.')} class="grid-item">.</button><!--one comma only + no operator after comma -->
+    <button on:click={()=>dot()} class="grid-item">.</button><!--one comma only + no operator after comma -->
     <button on:click={calculate} class="grid-item">=</button> <!--calculation needed -->
-    <button on:click={()=>console.log(eval("10/5"))} class="grid-item">test</button> <!--calculation needed -->
+   
 
 
 
@@ -116,26 +123,24 @@ function handleKeydown(event) {
 <style>
     .grid-container {
         display: grid;
-        /* grid-template-columns: auto auto auto; */
         grid-template-columns:repeat(4,1fr);
         grid-template-rows:repeat(6,1fr);
-        background-color: #2196F3;
+        background-color: navy;
         padding: 10px;
         gap: 2px 9px;
-        /* width: 30vw; */
         height: 65vh;
-     /* margin-left: 40%; */
-     
-   
+     max-width: 800px;
+     min-width: 600px;
+     min-height: 515px;
       }
       .grid-item {
-        background-color: rgba(255, 255, 255, 0.8);
+        background-color: rgba(255, 255, 255, 0.755);
         border: 1px solid rgba(0, 0, 0, 0.8);
         padding: 20px;
         font-size: 30px;
         text-align: center;
-        
-        /* cursor: pointer; */
+        border-radius: 30%;
+        cursor: pointer;
       }
       .screen{
         box-sizing: border-box;
