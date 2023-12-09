@@ -2,9 +2,9 @@
 import {onMount} from 'svelte';
  let result='';
  
-let isComma=false
+let isDot=false
 let regex=/[+\-*/]$/
-let regexComma=/[.]$/;
+let regexDot=/[.]$/;
 
 
 
@@ -18,7 +18,7 @@ let backspace=()=>{
             temp=temp+result[i]
         }
         if(result[result.length-1]==='.'){
-            isComma=false
+            isDot=false
         }
         result=temp
     }
@@ -27,38 +27,40 @@ let backspace=()=>{
 let dot =()=>{ 
     if (!result||regex.test(result)){
         result+='0.'
-    }else if(regexComma.test(result)){
+        isDot=!isDot
+    }else if(regexDot.test(result)){
         console.log('no')
-    }else if(isComma === false){
+    }else if(isDot === false){
         result+='.';
-         isComma=!isComma
+         isDot=!isDot
         }
 }
 let operator=(operator)=>{
     if (!result){
-    }else if(regex.test(result)||regexComma.test(result)){
+    }else if(regex.test(result)||regexDot.test(result)){
        console.log('no') 
     }else{
         result+=operator
-        isComma=false
+        isDot=false
     }
 }
 
 let calculate=()=>{
-    if(regex.test(result) || regexComma.test(result)){
-        console.log('cant calculate if operator or comma is the last thing you type')
+    if(regex.test(result) || regexDot.test(result)){
+        console.log('cant calculate if operator or dot is the last thing you type')
     }else if(eval(result)){
         result=eval(result)
         if(result%1!==0){
-            isComma=true
+            isDot=true
         }else if(result%1===0){
-            isComma=false
+            isDot=false
         }
     }
 }
 
 onMount(()=>{
     window.addEventListener('keydown', handleKeydown)
+    // kill it onDestroy 
 })
 
 function handleKeydown(event) {
@@ -77,7 +79,7 @@ function handleKeydown(event) {
         operator(event.key)
     }
     else if(event.key ==='C' ||event.key ==='c' ){
-        isComma=!isComma
+        isDot=!isDot
         result=''
     }
     else if (event.key ==='.'){
@@ -87,9 +89,8 @@ function handleKeydown(event) {
 
   }
 
-  
-
 </script>
+<div class="wrapper">
 
 
 <div class="grid-container">
@@ -108,30 +109,54 @@ function handleKeydown(event) {
     <button on:click={()=>result+='2'} class="grid-item">2</button>
     <button on:click={()=>result+='3'} class="grid-item">3</button>
     <button id="operator" value="+" on:click={()=>operator('+')} class="grid-item">+</button> <!--calculation needed -->
-    <button on:click={()=>{isComma=!isComma;result=''}} class="grid-item">C</button>
+    <button on:click={()=>{isDot=false;result=''}} class="grid-item">C</button>
     <button on:click={()=>result+='0'} class="grid-item">0</button>
-    <button on:click={()=>dot()} class="grid-item">.</button><!--one comma only + no operator after comma -->
+    <button on:click={()=>dot()} class="grid-item">.</button><!--one dot only + no operator after dot -->
     <button on:click={calculate} class="grid-item">=</button> <!--calculation needed -->
-   
-
-
-
-
-
   </div>
-
+  <div class="history">
+    <h1>history</h1>
+    <div class="history-body"></div>
+  </div>
+</div>
 <style>
+    *{
+     
+    }
+    .wrapper{
+        display: grid;
+        grid-template-columns:1fr,2fr,1fr;
+    }
     .grid-container {
+        grid-column-start: 2;
         display: grid;
         grid-template-columns:repeat(4,1fr);
         grid-template-rows:repeat(6,1fr);
-        background-color: navy;
+        background-color:  #262626;
         padding: 10px;
         gap: 2px 9px;
         height: 65vh;
      max-width: 800px;
      min-width: 600px;
      min-height: 515px;
+     /* justify-self: center;
+     align-self: center; */
+      }
+      .history{
+        grid-column-start: 3;
+        height: 65vh;
+        /* border: 2px solid red; */
+        text-align: center;
+        min-width: 300px;
+        max-width: 500px;
+        min-height: 515px;
+      }
+      .history-body{
+        /* border: 2px red solid; */
+        height: 85%;
+        background-color: rgba(255, 255, 255, 0.755);
+        color: #262626;
+
       }
       .grid-item {
         background-color: rgba(255, 255, 255, 0.755);
@@ -142,10 +167,15 @@ function handleKeydown(event) {
         border-radius: 30%;
         cursor: pointer;
       }
+      .grid-item:hover{
+        background-color:white;
+    }
       .screen{
         box-sizing: border-box;
         grid-column-start: span 3;
         grid-row-start: span 2;
         font-size:35px ;
+        color: #262626;
+        
       }
 </style>
